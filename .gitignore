@@ -6,6 +6,7 @@ venv/
 build/
 dist/
 site-deploy/
+.netlify/
 *.egg-info/
 .DS_Store
 Thumbs.db
