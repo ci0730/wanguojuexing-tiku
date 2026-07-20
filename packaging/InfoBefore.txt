@@ -1,0 +1,13 @@
+安装说明
+
+本程序为绿色自包含软件，安装后无需再装 Python 或任何 Python 依赖库。
+
+唯一可能需要的系统组件：
+  Microsoft Edge WebView2 运行时
+  （Windows 10 / 11 通常已自带；若启动时提示缺失，请安装官方 Evergreen 运行时）
+
+下载地址：
+  https://go.microsoft.com/fwlink/p/?LinkId=2124703
+
+安装完成后可从开始菜单或桌面快捷方式启动「万国觉醒题库」。
+使用方式：在游戏中截图后，对本软件窗口按 Ctrl+V 粘贴即可自动识别答案。

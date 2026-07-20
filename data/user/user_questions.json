@@ -1,0 +1,16 @@
+{
+  "updated_at": "2026-07-19 20:50:51",
+  "count": 2,
+  "questions": [
+    {
+      "question": "测试补题库题目ABCDEFG",
+      "answer": "测试答案XYZ",
+      "source": "manual"
+    },
+    {
+      "question": "健康检查补题唯一题干ABCDEF",
+      "answer": "健康答案",
+      "source": "manual"
+    }
+  ]
+}

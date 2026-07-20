@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>万国觉醒题库</title>
+  <meta name="description" content="万国觉醒 · 国士无双本地题库。截图识题，自动匹配正确答案。Windows 一键下载。" />
+  <link rel="icon" href="assets/app.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1c1410;
+      --ink-soft: rgba(28, 20, 16, 0.72);
+      --paper: #f3e6cf;
+      --accent: #8b3a2a;
+      --accent-soft: #c45c3e;
+      --ok: #1f6b3a;
+      --line: rgba(28, 20, 16, 0.14);
+      --shadow: 0 22px 60px rgba(40, 22, 8, 0.2);
+      --font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+      --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font-body);
+      background:
+        radial-gradient(1100px 560px at 8% -8%, rgba(196, 92, 62, 0.2), transparent 55%),
+        radial-gradient(900px 480px at 100% 0%, rgba(31, 107, 58, 0.12), transparent 48%),
+        linear-gradient(165deg, #f7edd9 0%, #e8d4b4 48%, #d9c39a 100%);
+      min-height: 100vh;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(28, 20, 16, 0.18) 0%, rgba(28, 20, 16, 0.55) 100%),
+        url("assets/mascot.png") center 28% / cover no-repeat;
+      transform: scale(1.04);
+      animation: drift 14s ease-in-out infinite alternate;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    @keyframes drift {
+      from { transform: scale(1.04) translateY(0); }
+      to { transform: scale(1.08) translateY(-1.5%); }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 0 0 3.2rem;
+      color: #f8efe0;
+      animation: rise 0.9s ease-out both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .brand-mark {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      object-fit: cover;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      background: #3aa0ff;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5.5vw, 3.15rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.15;
+      margin: 0;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .lede {
+      margin: 0 0 1.35rem;
+      max-width: 34rem;
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      line-height: 1.65;
+      color: rgba(248, 239, 224, 0.9);
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.85rem 1.35rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font: inherit;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #d46a4a, var(--accent));
+      color: #fff8f0;
+      box-shadow: 0 12px 28px rgba(139, 58, 42, 0.45);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 16px 34px rgba(139, 58, 42, 0.55);
+    }
+
+    .btn-ghost {
+      background: rgba(248, 239, 224, 0.12);
+      border-color: rgba(248, 239, 224, 0.35);
+      color: #f8efe0;
+      backdrop-filter: blur(8px);
+    }
+
+    .meta {
+      margin-top: 0.85rem;
+      font-size: 0.88rem;
+      color: rgba(248, 239, 224, 0.72);
+    }
+
+    .section {
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3.2rem 0 3.8rem;
+      animation: rise 1s 0.15s ease-out both;
+    }
+
+    .section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.45rem, 3vw, 1.85rem);
+      margin: 0 0 0.45rem;
+      letter-spacing: 0.04em;
+    }
+
+    .section > p {
+      margin: 0 0 1.4rem;
+      color: var(--ink-soft);
+      max-width: 36rem;
+      line-height: 1.6;
+    }
+
+    .steps {
+      display: grid;
+      gap: 0.9rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.85rem;
+      align-items: start;
+      padding: 1rem 1.05rem;
+      background: linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(243, 230, 207, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .steps li::before {
+      content: counter(step);
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #fff8f0;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 0.1rem;
+    }
+
+    .steps strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 1.02rem;
+    }
+
+    .steps span {
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .req {
+      margin-top: 1.6rem;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--ok);
+      background: rgba(31, 107, 58, 0.08);
+      border-radius: 0 12px 12px 0;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+
+    footer {
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 0 0 2.2rem;
+      font-size: 0.85rem;
+      color: rgba(28, 20, 16, 0.55);
+    }
+
+    @media (max-width: 640px) {
+      .hero-inner { padding-bottom: 2.4rem; }
+      .brand-mark { width: 46px; height: 46px; border-radius: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="brand-row">
+        <img class="brand-mark" src="assets/app.png" width="56" height="56" alt="" />
+        <h1 class="brand">万国觉醒题库</h1>
+      </div>
+      <p class="lede">本地题库 + 截图识题。粘贴国士无双答题界面，自动 OCR 并匹配正确答案。</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" id="downloadBtn" href="https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/%E4%B8%87%E5%9B%BD%E8%A7%89%E9%86%92%E9%A2%98%E5%BA%93_%E4%BE%BF%E6%90%BA%E7%89%88_v1.0.0.zip">下载 Windows 版</a>
+        <a class="btn btn-ghost" href="#how">查看用法</a>
+      </div>
+      <p class="meta">便携版 · v1.0.0 · 无需安装 Python · 解压即用</p>
+    </div>
+  </header>
+
+  <section class="section" id="how">
+    <h2>三步出答案</h2>
+    <p>专为国士无双知识广场设计，全流程在本地完成，不依赖网页搜题。</p>
+    <ol class="steps">
+      <li>
+        <div>
+          <strong>截图</strong>
+          <span>在游戏里截取题目 + 选项界面。</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>粘贴</strong>
+          <span>打开软件，拖入图片或按 Ctrl+V 粘贴。</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>识别</strong>
+          <span>点击「识别并答题」，自动匹配题库答案；也可关键词搜索。</span>
+        </div>
+      </li>
+    </ol>
+    <div class="req">
+      系统要求：Windows 10 / 11；需 Microsoft Edge WebView2（多数系统已自带）。题库约 2600+ 题，新题可能未收录时可关键词补查。
+    </div>
+  </section>
+
+  <footer>
+    <p>万国觉醒题库 · wanguojuexing.cn.mt · 非官方粉丝工具</p>
+  </footer>
+
+  <script>
+    (function () {
+      var btn = document.getElementById("downloadBtn");
+      var releaseUrl = "https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/%E4%B8%87%E5%9B%BD%E8%A7%89%E9%86%92%E9%A2%98%E5%BA%93_%E4%BE%BF%E6%90%BA%E7%89%88_v1.0.0.zip";
+      if (releaseUrl.indexOf("http") === 0) {
+        btn.href = releaseUrl;
+      }
+    })();
+  </script>
+</body>
+</html>

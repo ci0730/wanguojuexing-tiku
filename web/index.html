@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>万国觉醒 · 国士无双题库</title>
+  <link rel="icon" href="/assets/app.png" type="image/png" />
+  <style>
+    :root {
+      --ink: #1c1410;
+      --paper: #f3e6cf;
+      --paper-deep: #e5d2ae;
+      --accent: #8b3a2a;
+      --accent-soft: #c45c3e;
+      --ok: #1f6b3a;
+      --ok-bg: #d8f0df;
+      --line: rgba(28, 20, 16, 0.14);
+      --shadow: 0 18px 50px rgba(40, 22, 8, 0.18);
+      --font-display: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", serif;
+      --font-body: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font-body);
+      overflow-y: auto;
+      scrollbar-width: none;          /* Firefox */
+      -ms-overflow-style: none;       /* old Edge */
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(196, 92, 62, 0.18), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(31, 107, 58, 0.12), transparent 50%),
+        linear-gradient(160deg, #f7edd9 0%, #e8d4b4 45%, #d9c39a 100%);
+    }
+
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      width: 0 !important;
+      height: 0 !important;
+      display: none;
+    }
+
+    .wrap {
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.1rem 0 1.5rem;
+    }
+
+    header {
+      margin-bottom: 0.9rem;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: clamp(1.55rem, 4vw, 2.1rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin: 0 0 0.15rem;
+      line-height: 1.2;
+    }
+
+    .brand-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(40, 22, 8, 0.18);
+      background: #3aa0ff;
+    }
+
+    .sub {
+      margin: 0.35rem 0 0;
+      opacity: 0.78;
+      font-size: 0.95rem;
+    }
+
+    .stats {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.55rem;
+      font-size: 0.88rem;
+      color: rgba(28, 20, 16, 0.7);
+      flex-wrap: wrap;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(243, 230, 207, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 0.95rem;
+    }
+
+    .drop {
+      border: 2px dashed rgba(139, 58, 42, 0.35);
+      border-radius: 14px;
+      padding: 0.85rem 0.8rem;
+      text-align: center;
+      background:
+        repeating-linear-gradient(
+          -12deg,
+          transparent,
+          transparent 10px,
+          rgba(139, 58, 42, 0.03) 10px,
+          rgba(139, 58, 42, 0.03) 11px
+        );
+      transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .drop h2 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      margin: 0 0 0.25rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+      margin-top: 0.7rem;
+    }
+
+    .preview {
+      margin-top: 0.7rem;
+      display: none;
+    }
+
+    .preview img {
+      width: 100%;
+      max-height: 96px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #1c1410;
+    }
+
+    .result {
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    .answer-card {
+      background: var(--ok-bg);
+      border: 1px solid rgba(31, 107, 58, 0.25);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      animation: rise 0.35s ease;
+    }
+
+    .answer-value {
+      font-family: var(--font-display);
+      font-size: clamp(1.35rem, 3.2vw, 1.75rem);
+      font-weight: 700;
+      margin: 0;
+      color: #143d24;
+      line-height: 1.3;
+    }
+
+    .list {
+      margin: 0.55rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: none; /* hide candidates by default to keep answer on screen */
+      grid-gap: 0.45rem;
+    }
+
+    .list.show {
+      display: grid;
+    }
+
+    .more-btn {
+      margin-top: 0.55rem;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(139, 58, 42, 0.28);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.88rem;
+    }
+
+    .status {
+      margin-top: 0.55rem;
+      min-height: 1.2em;
+      font-size: 0.9rem;
+      color: rgba(28,20,16,0.72);
+    }
+
+    .ocr {
+      margin-top: 0.55rem;
+      white-space: pre-wrap;
+      font-size: 0.8rem;
+      opacity: 0.65;
+      background: rgba(28,20,16,0.04);
+      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      max-height: 72px;
+      overflow: auto;
+      scrollbar-width: none;
+    }
+
+    footer {
+      margin-top: 0.85rem;
+      font-size: 0.8rem;
+      opacity: 0.6;
+      line-height: 1.45;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-text { min-width: 0; }
+
+    .credit {
+      margin: 0.1rem 0 0;
+      font-size: 0.88rem;
+      color: rgba(28, 20, 16, 0.62);
+    }
+
+    .link-btn {
+      appearance: none;
+      border: 1px solid rgba(139, 58, 42, 0.35);
+      background: rgba(255,255,255,0.55);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .link-btn:hover { background: rgba(196, 92, 62, 0.12); }
+
+    .bank-wrap { margin-bottom: 0.75rem; }
+
+    .bank-panel h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.6rem;
+      font-size: 1.15rem;
+    }
+
+    .bank-grid {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .bank-grid label {
+      display: grid;
+      gap: 0.3rem;
+      font-size: 0.92rem;
+    }
+
+    .bank-grid input,
+    .bank-grid textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.7rem 0.85rem;
+      font: inherit;
+      background: rgba(255,255,255,0.75);
+      outline: none;
+      resize: vertical;
+    }
+
+    .bank-grid textarea { min-height: 72px; }
+
+    .bank-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 0.2rem;
+    }
+
+    .bank-actions .secondary {
+      background: #2b211b;
+    }
+
+    .bank-note {
+      margin: 0.55rem 0 0;
+      font-size: 0.85rem;
+      opacity: 0.72;
+      line-height: 1.45;
+    }
+
+    .bank-msg {
+      margin-top: 0.55rem;
+      font-size: 0.92rem;
+      color: rgba(28,20,16,0.78);
+      white-space: pre-wrap;
+    }
+
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(243, 230, 207, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+    }
+
+    .drop {
+      border: 2px dashed rgba(139, 58, 42, 0.35);
+      border-radius: 14px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background:
+        repeating-linear-gradient(
+          -12deg,
+          transparent,
+          transparent 10px,
+          rgba(139, 58, 42, 0.03) 10px,
+          rgba(139, 58, 42, 0.03) 11px
+        );
+      transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .drop.dragover {
+      border-color: var(--accent);
+      background-color: rgba(196, 92, 62, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .drop h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin: 0 0 0.35rem;
+    }
+
+    .drop p {
+      margin: 0;
+      opacity: 0.72;
+    }
+
+    .drop kbd {
+      display: inline-block;
+      padding: 0.05em 0.4em;
+      border: 1px solid rgba(28, 20, 16, 0.2);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.7);
+      font: inherit;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    .drop.paste-flash {
+      border-color: var(--ok);
+      background-color: rgba(31, 107, 58, 0.1);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    button, .file-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 0.7rem 1.15rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff8ef;
+      transition: transform 0.15s, background 0.15s, opacity 0.15s;
+    }
+
+    button:hover, .file-btn:hover { background: var(--accent-soft); transform: translateY(-1px); }
+    button:disabled { opacity: 0.55; cursor: wait; transform: none; }
+
+    .file-btn {
+      display: inline-flex;
+      align-items: center;
+      background: #2b211b;
+    }
+
+    input[type="file"] { display: none; }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.55rem;
+      margin-top: 0.75rem;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.7rem 0.95rem;
+      font: inherit;
+      background: rgba(255,255,255,0.7);
+      outline: none;
+    }
+
+    input[type="search"]:focus {
+      border-color: rgba(139, 58, 42, 0.55);
+      box-shadow: 0 0 0 3px rgba(196, 92, 62, 0.15);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .answer-label {
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ok);
+      margin: 0 0 0.2rem;
+      font-weight: 600;
+    }
+
+    .meta {
+      margin: 0.4rem 0 0;
+      font-size: 0.88rem;
+      opacity: 0.8;
+    }
+
+    .list li {
+      background: rgba(255,255,255,0.55);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.65rem 0.8rem;
+    }
+
+    .list .q { margin: 0 0 0.2rem; font-size: 0.88rem; opacity: 0.85; }
+    .list .a { margin: 0; font-weight: 600; }
+    .score {
+      float: right;
+      font-size: 0.8rem;
+      color: rgba(28,20,16,0.55);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand-row">
+        <img class="brand-avatar" src="/assets/app.png" alt="万国觉醒题库" />
+        <div class="brand-text">
+          <h1 class="brand">万国觉醒题库</h1>
+          <p class="credit">博学智识 · 题库助手</p>
+        </div>
+      </div>
+      <p class="sub">桌面识题工具 · 粘贴截图即可匹配正确答案</p>
+      <div class="stats" id="stats">正在加载题库…</div>
+      <div style="margin-top:0.7rem">
+        <button type="button" class="link-btn" id="bankToggle">补题库</button>
+      </div>
+    </header>
+
+    <section class="panel bank-wrap" id="bankWrap" hidden>
+      <div class="bank-panel open" id="bankPanel">
+        <h3>补题库</h3>
+        <div class="bank-grid">
+          <label>
+            题目
+            <textarea id="addQuestion" placeholder="粘贴完整题目…"></textarea>
+          </label>
+          <label>
+            正确答案
+            <input id="addAnswer" type="text" placeholder="例如：伦敦国家美术馆" />
+          </label>
+          <div class="bank-actions">
+            <button type="button" id="addBtn">手动添加本题</button>
+            <button type="button" class="secondary" id="onlineBtn">联网更新公开题库</button>
+          </div>
+          <p class="bank-note">
+            手动添加会立即生效。联网更新会从公开整理站拉取题库并去重导入（需联网，可能需要几十秒）。
+            用户补充保存在本机可写目录，不影响安装文件。
+          </p>
+          <div class="bank-msg" id="bankMsg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="粘贴或上传答题截图">
+        <h2>拖入或粘贴答题截图</h2>
+        <p>在窗口内任意位置按 <kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴即可自动识别；再粘贴会自动替换上一张</p>
+        <div class="actions">
+          <label class="file-btn">
+            选择截图
+            <input id="file" type="file" accept="image/*" />
+          </label>
+          <button type="button" id="solveBtn" disabled>识别并答题</button>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <input id="q" type="search" placeholder="也可以直接输入题目关键词搜索…" />
+        <button type="button" id="searchBtn">搜索</button>
+      </div>
+
+      <div class="status" id="status"></div>
+
+      <div class="result" id="result">
+        <div class="answer-card" id="answerCard">
+          <p class="answer-label">正确答案</p>
+          <p class="answer-value" id="answer">—</p>
+          <p class="meta" id="matched"></p>
+        </div>
+        <button type="button" class="more-btn" id="moreBtn" hidden>查看更多候选</button>
+        <ul class="list" id="candidates"></ul>
+        <div class="ocr" id="ocr" hidden></div>
+      </div>
+
+      <div class="preview" id="preview">
+        <img id="previewImg" alt="截图预览" />
+      </div>
+    </section>
+
+    <footer>
+      初试 / 复试 / 终试共用同一题池。题库来自公开整理，游戏会持续加新题，无法保证 100% 覆盖。
+      识别不准时可用关键词搜索，或把新题答案补充进题库。
+    </footer>
+  </div>
+
+  <script>
+    const drop = document.getElementById("drop");
+    const fileInput = document.getElementById("file");
+    const solveBtn = document.getElementById("solveBtn");
+    const searchBtn = document.getElementById("searchBtn");
+    const qInput = document.getElementById("q");
+    const statusEl = document.getElementById("status");
+    const preview = document.getElementById("preview");
+    const previewImg = document.getElementById("previewImg");
+    const resultEl = document.getElementById("result");
+    const answerEl = document.getElementById("answer");
+    const matchedEl = document.getElementById("matched");
+    const candidatesEl = document.getElementById("candidates");
+    const ocrEl = document.getElementById("ocr");
+    const moreBtn = document.getElementById("moreBtn");
+    const answerCard = document.getElementById("answerCard");
+
+    const bankToggle = document.getElementById("bankToggle");
+    const bankWrap = document.getElementById("bankWrap");
+    const bankMsg = document.getElementById("bankMsg");
+    const addQuestion = document.getElementById("addQuestion");
+    const addAnswer = document.getElementById("addAnswer");
+    const addBtn = document.getElementById("addBtn");
+    const onlineBtn = document.getElementById("onlineBtn");
+
+    let currentFile = null;
+    let solveToken = 0;
+    let solveAbort = null;
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+        const user = data.user_added ? `，自建补充 ${data.user_added} 题` : "";
+        const ready = data.ocr_ready ? " · 识别已就绪" : " · 识别引擎预热中";
+        document.getElementById("stats").textContent =
+          `已装载 ${data.total} 题（中文约 ${data.zh} 题${user}）${ready}`;
+      } catch {
+        document.getElementById("stats").textContent = "题库服务未启动，请先运行 python desktop.py";
+      }
+    }
+
+    // Kick OCR warmup as soon as UI opens
+    fetch("/api/warmup", { method: "POST" }).then(() => loadStats()).catch(() => {});
+
+    bankToggle.addEventListener("click", () => {
+      const open = bankWrap.hasAttribute("hidden");
+      if (open) bankWrap.removeAttribute("hidden");
+      else bankWrap.setAttribute("hidden", "");
+      bankToggle.textContent = open ? "收起补题库" : "补题库";
+    });
+
+    addBtn.addEventListener("click", async () => {
+      const question = addQuestion.value.trim();
+      const answer = addAnswer.value.trim();
+      if (!question || !answer) {
+        bankMsg.textContent = "请填写题目和答案";
+        return;
+      }
+      addBtn.disabled = true;
+      bankMsg.textContent = "正在保存…";
+      try {
+        const res = await fetch("/api/questions/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, answer }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "保存失败");
+        bankMsg.textContent = `${data.status === "updated" ? "已更新" : "已添加"}：${data.answer}\n当前题库 ${data.total} 题（自建 ${data.user_added}）`;
+        addQuestion.value = "";
+        addAnswer.value = "";
+        loadStats();
+      } catch (err) {
+        bankMsg.textContent = err.message || String(err);
+      } finally {
+        addBtn.disabled = false;
+      }
+    });
+
+    onlineBtn.addEventListener("click", async () => {
+      onlineBtn.disabled = true;
+      bankMsg.textContent = "正在联网搜索并导入公开题库，请稍候…";
+      try {
+        const res = await fetch("/api/questions/import-online", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "导入失败");
+        const lines = [
+          `新增 ${data.added} 题，跳过重复 ${data.skipped} 题`,
+          `当前题库 ${data.total} 题（自建 ${data.user_added}）`,
+        ];
+        for (const s of data.sources || []) {
+          lines.push(`· ${s.name}：抓取 ${s.fetched}，新增 ${s.added}`);
+        }
+        if (data.failed?.length) {
+          lines.push("部分来源失败：");
+          for (const f of data.failed) lines.push(`· ${f.id}: ${f.error}`);
+        }
+        bankMsg.textContent = lines.join("\n");
+        loadStats();
+      } catch (err) {
+        bankMsg.textContent = "联网导入失败：" + (err.message || String(err));
+      } finally {
+        onlineBtn.disabled = false;
+      }
+    });
+
+    function flashDrop() {
+      drop.classList.add("paste-flash");
+      setTimeout(() => drop.classList.remove("paste-flash"), 450);
+    }
+
+    function setFile(file, { autoSolve = false } = {}) {
+      if (!file || !String(file.type || "").startsWith("image/")) return;
+      if (previewImg.src?.startsWith("blob:")) URL.revokeObjectURL(previewImg.src);
+      currentFile = file;
+      solveBtn.disabled = false;
+      preview.style.display = "block";
+      previewImg.src = URL.createObjectURL(file);
+      flashDrop();
+      if (autoSolve) {
+        statusEl.textContent = "已替换截图，正在识别新题…";
+        solve();
+      } else {
+        statusEl.textContent = `已选择：${file.name || "截图"}，点击「识别并答题」或再按 Ctrl+V 换一张`;
+      }
+    }
+
+    function fileFromClipboard(clipboardData) {
+      if (!clipboardData) return null;
+      const items = [...(clipboardData.items || [])];
+      const imageItem = items.find((it) => it.type && it.type.startsWith("image/"));
+      if (imageItem) {
+        const file = imageItem.getAsFile();
+        if (file) {
+          return new File([file], `paste-${Date.now()}.png`, {
+            type: file.type || "image/png",
+          });
+        }
+      }
+      const files = [...(clipboardData.files || [])];
+      return files.find((f) => f.type.startsWith("image/")) || null;
+    }
+
+    function renderResults(payload, fromSearch = false) {
+      resultEl.style.display = "block";
+      const top = fromSearch ? (payload.results?.[0] || null) : (payload.candidates?.[0] || null);
+      const list = fromSearch ? (payload.results || []) : (payload.candidates || []);
+
+      if (payload.answer || top?.answer) {
+        answerEl.textContent = payload.answer || top.answer;
+        matchedEl.textContent = `匹配度 ${payload.confidence ?? top.score}% · ${payload.matched_question || top.question}`;
+      } else {
+        answerEl.textContent = "未找到可靠匹配";
+        matchedEl.textContent = "可尝试裁切题干区域，或改用关键词搜索";
+      }
+
+      candidatesEl.classList.remove("show");
+      candidatesEl.innerHTML = list.map((item) => `
+        <li>
+          <span class="score">${item.score}%</span>
+          <p class="q">${escapeHtml(item.question)}</p>
+          <p class="a">答案：${escapeHtml(item.answer)}</p>
+        </li>
+      `).join("");
+
+      if (list.length > 1) {
+        moreBtn.hidden = false;
+        moreBtn.textContent = "查看更多候选";
+      } else {
+        moreBtn.hidden = true;
+      }
+
+      if (payload.ocr_text) {
+        ocrEl.hidden = true; // keep main answer visible; OCR details optional
+        ocrEl.textContent = "OCR 识别：\n" + payload.ocr_text;
+      } else {
+        ocrEl.hidden = true;
+      }
+
+      // Keep answer in view without forcing user to hunt for scrollbar
+      requestAnimationFrame(() => {
+        answerCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    async function solve() {
+      if (!currentFile) return;
+      const token = ++solveToken;
+      const file = currentFile;
+      if (solveAbort) {
+        try { solveAbort.abort(); } catch (_) {}
+      }
+      solveAbort = new AbortController();
+      solveBtn.disabled = true;
+      statusEl.textContent = "正在识别截图并匹配题库…";
+      const form = new FormData();
+      form.append("image", file, file.name || "screenshot.png");
+      try {
+        const res = await fetch("/api/solve", {
+          method: "POST",
+          body: form,
+          signal: solveAbort.signal,
+        });
+        if (token !== solveToken) return;
+        const data = await res.json();
+        if (token !== solveToken) return;
+        if (!res.ok) throw new Error(data.error || "识别失败");
+        renderResults(data);
+        statusEl.textContent = data.answer
+          ? `识别完成${data.timing_ms ? `（${data.timing_ms.total}ms）` : ""}，可继续 Ctrl+V 换下一题`
+          : "识别完成，但置信度较低；可再 Ctrl+V 换一张";
+      } catch (err) {
+        if (token !== solveToken) return;
+        if (err && err.name === "AbortError") return;
+        statusEl.textContent = err.message || String(err);
+      } finally {
+        if (token === solveToken) {
+          solveBtn.disabled = !currentFile;
+        }
+      }
+    }
+
+    async function search() {
+      const q = qInput.value.trim();
+      if (!q) return;
+      statusEl.textContent = "搜索中…";
+      const res = await fetch("/api/search?q=" + encodeURIComponent(q) + "&limit=8");
+      const data = await res.json();
+      renderResults(data, true);
+      statusEl.textContent = `找到 ${data.results.length} 条候选`;
+    }
+
+    drop.addEventListener("click", (e) => {
+      if (e.target.closest("button, label")) return;
+      drop.focus();
+      statusEl.textContent = "已就绪：直接 Ctrl+V 粘贴截图，或点「选择截图」";
+    });
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("dragover"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+    drop.addEventListener("drop", (e) => {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      const file = [...(e.dataTransfer.files || [])].find((f) => f.type.startsWith("image/"));
+      if (file) setFile(file, { autoSolve: true });
+    });
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file) setFile(file, { autoSolve: true });
+    });
+
+    // 全页快捷粘贴：即使焦点在搜索框，有图片也优先识别
+    document.addEventListener("paste", (e) => {
+      const file = fileFromClipboard(e.clipboardData);
+      if (!file) return;
+      e.preventDefault();
+      setFile(file, { autoSolve: true });
+    });
+
+    solveBtn.addEventListener("click", solve);
+    searchBtn.addEventListener("click", search);
+    qInput.addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
+    moreBtn.addEventListener("click", () => {
+      const open = candidatesEl.classList.toggle("show");
+      moreBtn.textContent = open ? "收起候选" : "查看更多候选";
+      if (open) ocrEl.hidden = !ocrEl.textContent;
+      else ocrEl.hidden = true;
+    });
+
+    drop.focus();
+    loadStats();
+  </script>
+</body>
+</html>
