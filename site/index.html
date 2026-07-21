@@ -6,9 +6,6 @@
   <title>万国觉醒题库</title>
   <meta name="description" content="万国觉醒 · 国士无双本地题库。截图识题，自动匹配正确答案。Windows 一键下载。" />
   <link rel="icon" href="assets/app.png" type="image/png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --ink: #1c1410;
@@ -19,8 +16,8 @@
       --ok: #1f6b3a;
       --line: rgba(28, 20, 16, 0.14);
       --shadow: 0 22px 60px rgba(40, 22, 8, 0.2);
-      --font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
-      --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-display: "Source Han Serif SC", "Songti SC", "SimSun", "Noto Serif SC", serif;
+      --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -259,11 +256,10 @@
       </div>
       <p class="lede">本地题库 + 截图识题。粘贴国士无双答题界面，自动 OCR 并匹配正确答案。</p>
       <div class="cta-row">
-        <a class="btn btn-primary" id="downloadBtn" href="https://ghproxy.net/https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip">下载 Windows 版</a>
-        <a class="btn btn-ghost" id="downloadMirrorBtn" href="https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip">GitHub 直链</a>
+        <a class="btn btn-primary" href="https://wwbuq.lanzouu.com/iSrm13xtgukh" target="_blank" rel="noopener noreferrer">下载 Windows 版</a>
         <a class="btn btn-ghost" href="#how">查看用法</a>
       </div>
-      <p class="meta">便携版 · v1.0.0 · 约 107MB · 国内请用主按钮（加速镜像）· 解压即用</p>
+      <p class="meta">便携版 · v1.0.0 · 约 94MB · 解压即用</p>
     </div>
   </header>
 
@@ -298,27 +294,5 @@
   <footer>
     <p>万国觉醒题库 · wanguojuexing.cn.mt · 非官方粉丝工具</p>
   </footer>
-
-  <script>
-    (function () {
-      var githubZip = "https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip";
-      var mirrors = [
-        "https://ghproxy.net/https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip",
-        "https://mirror.ghproxy.com/https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip",
-        "https://gh.ddlc.top/https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.0/wanguojuexing-tiku-portable-v1.0.0.zip"
-      ];
-      var btn = document.getElementById("downloadBtn");
-      var alt = document.getElementById("downloadMirrorBtn");
-      btn.href = mirrors[0];
-      alt.href = githubZip;
-      // If primary mirror fails to open quickly, user can click GitHub 直链 or we rotate once on click error
-      var idx = 0;
-      btn.addEventListener("click", function () {
-        idx = (idx + 1) % mirrors.length;
-        // keep current as started; next click tries next mirror if previous hung
-        setTimeout(function () { btn.href = mirrors[idx]; }, 800);
-      });
-    })();
-  </script>
 </body>
 </html>
