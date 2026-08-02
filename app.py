@@ -1737,10 +1737,47 @@ def index():
 @app.get("/api/health")
 def health():
     try:
+        from version_info import APP_VERSION
+
         count = len(load_bank())
-        return jsonify({"ok": True, "app": APP_ID, "total": count, "ocr_ready": _OCR_READY})
+        return jsonify(
+            {
+                "ok": True,
+                "app": APP_ID,
+                "total": count,
+                "ocr_ready": _OCR_READY,
+                "version": APP_VERSION,
+            }
+        )
     except Exception as exc:
         return jsonify({"ok": False, "app": APP_ID, "error": str(exc)}), 500
+
+
+@app.get("/api/version")
+def api_version():
+    try:
+        from version_info import check_for_update
+
+        force = request.args.get("force") == "1"
+        return jsonify(check_for_update(force_fetch=force))
+    except Exception as exc:
+        log.exception("version check failed")
+        return jsonify({"error": str(exc), "update_available": False, "checked": False}), 500
+
+
+@app.post("/api/version/skip")
+def api_version_skip():
+    try:
+        from version_info import skip_version
+
+        data = request.get_json(silent=True) or {}
+        ver = str(data.get("version") or "").strip()
+        if not ver:
+            return jsonify({"error": "缺少 version"}), 400
+        skip_version(ver)
+        return jsonify({"ok": True, "skipped_version": ver})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @app.get("/api/warmup")

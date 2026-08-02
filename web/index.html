@@ -88,6 +88,40 @@
       flex-wrap: wrap;
     }
 
+    .update-banner {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 14px;
+      border: 1px solid rgba(139, 58, 42, 0.28);
+      background: rgba(196, 92, 62, 0.12);
+      color: var(--ink);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .update-banner.open { display: block; }
+    .update-banner strong { color: var(--accent); }
+    .update-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.55rem;
+    }
+    .update-actions button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff8f0;
+    }
+    .update-actions button.secondary {
+      background: #2b211b;
+    }
+
     .panel {
       background: linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(243, 230, 207, 0.95));
       border: 1px solid var(--line);
@@ -664,6 +698,14 @@
       </div>
       <p class="sub">桌面识题工具 · 粘贴截图或开启悬浮框，自动识别框内题目</p>
       <div class="stats" id="stats">正在加载题库…</div>
+      <div class="update-banner" id="updateBanner" role="status">
+        <div id="updateText"></div>
+        <div class="update-actions">
+          <button type="button" id="updateNowBtn">前往下载</button>
+          <button type="button" class="secondary" id="updateSkipBtn">跳过此版本</button>
+          <button type="button" class="secondary" id="updateLaterBtn">稍后</button>
+        </div>
+      </div>
       <div style="margin-top:0.7rem; display:flex; gap:0.55rem; flex-wrap:wrap">
         <button type="button" class="link-btn" id="overlayBtn">开启悬浮识题框</button>
         <button type="button" class="link-btn" id="bankToggle">补题库</button>
@@ -826,12 +868,57 @@
         const data = await res.json();
         const user = data.user_added ? `，自建补充 ${data.user_added} 题` : "";
         const ready = data.ocr_ready ? " · 识别已就绪" : " · 识别引擎预热中";
+        let ver = "";
+        try {
+          const vr = await fetch("/api/version");
+          const vd = await vr.json();
+          if (vd.app_version) ver = ` · v${vd.app_version}`;
+          showUpdateBanner(vd);
+        } catch {}
         document.getElementById("stats").textContent =
-          `已装载 ${data.total} 题（中文约 ${data.zh} 题${user}）${ready}`;
+          `已装载 ${data.total} 题（中文约 ${data.zh} 题${user}）${ready}${ver}`;
       } catch {
         document.getElementById("stats").textContent = "题库服务未启动，请先运行 python desktop.py";
       }
     }
+
+    let pendingUpdate = null;
+    function showUpdateBanner(vd) {
+      const banner = document.getElementById("updateBanner");
+      const text = document.getElementById("updateText");
+      if (!vd || !vd.update_available) {
+        banner.classList.remove("open");
+        pendingUpdate = null;
+        return;
+      }
+      pendingUpdate = vd;
+      const notes = (vd.notes || "").trim();
+      text.innerHTML =
+        `<strong>发现新版本 v${escapeHtml(vd.latest)}</strong>（当前 v${escapeHtml(vd.app_version)}）` +
+        (notes ? `<div style="margin-top:0.25rem">${escapeHtml(notes)}</div>` : "");
+      banner.classList.add("open");
+    }
+
+    document.getElementById("updateNowBtn").addEventListener("click", () => {
+      if (pendingUpdate && pendingUpdate.download_url) {
+        window.open(pendingUpdate.download_url, "_blank", "noopener,noreferrer");
+      }
+    });
+    document.getElementById("updateLaterBtn").addEventListener("click", () => {
+      document.getElementById("updateBanner").classList.remove("open");
+    });
+    document.getElementById("updateSkipBtn").addEventListener("click", async () => {
+      if (!pendingUpdate || !pendingUpdate.latest) return;
+      try {
+        await fetch("/api/version/skip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ version: pendingUpdate.latest }),
+        });
+      } catch {}
+      document.getElementById("updateBanner").classList.remove("open");
+      pendingUpdate = null;
+    });
 
     // Kick OCR warmup as soon as UI opens
     fetch("/api/warmup", { method: "POST" }).then(() => loadStats()).catch(() => {});

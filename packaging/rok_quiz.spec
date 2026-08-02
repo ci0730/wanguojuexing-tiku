@@ -56,6 +56,7 @@ hiddenimports = [
     "ocr_config",
     "desktop",
     "overlay",
+    "version_info",
     "yaml",
     "rapidocr_onnxruntime",
     "rapidocr_onnxruntime.main",

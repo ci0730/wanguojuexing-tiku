@@ -45,6 +45,7 @@ else:
         sys.path.insert(0, str(ROOT))
 
 from app import APP_ID, HOST, PORT, app, load_bank, warm_up  # noqa: E402
+from version_info import APP_VERSION, check_for_update, skip_version  # noqa: E402
 
 WINDOW_BG = "#f3e6cf"
 WINDOW_TITLE = "万国觉醒题库"
@@ -74,6 +75,50 @@ def _msg(text: str, title: str = WINDOW_TITLE, error: bool = True) -> None:
         ctypes.windll.user32.MessageBoxW(0, text, title, 0x10 if error else 0x40)
     except Exception:
         pass
+
+
+def _ask_update(info: dict) -> None:
+    """Popup when a newer installer is published. Yes=download, No=skip this version, Cancel=later."""
+    try:
+        import ctypes
+        import webbrowser
+
+        latest = str(info.get("latest") or "")
+        notes = str(info.get("notes") or "").strip()
+        url = str(info.get("download_url") or "").strip()
+        force = bool(info.get("force"))
+        body = f"发现新版本 v{latest}（当前 v{APP_VERSION}）\n\n"
+        if notes:
+            body += f"{notes}\n\n"
+        body += "是否前往下载更新？"
+        if force:
+            body += "\n\n（建议尽快更新）"
+            # Yes / No only — No still allows continue for now
+            flags = 0x24  # MB_YESNO | MB_ICONQUESTION
+        else:
+            body += "\n\n是 = 下载　否 = 跳过此版本　取消 = 下次再说"
+            flags = 0x23  # MB_YESNOCANCEL | MB_ICONQUESTION
+        code = ctypes.windll.user32.MessageBoxW(0, body, f"{WINDOW_TITLE} · 版本更新", flags)
+        if code == 6:  # IDYES
+            if url:
+                webbrowser.open(url)
+        elif code == 7 and not force:  # IDNO → skip this version
+            skip_version(latest)
+    except Exception:
+        _write_log("update prompt failed:\n" + traceback.format_exc())
+
+
+def _check_update_async() -> None:
+    def worker() -> None:
+        try:
+            time.sleep(1.2)
+            info = check_for_update(force_fetch=True)
+            if info.get("update_available"):
+                _ask_update(info)
+        except Exception:
+            _write_log("update check failed:\n" + traceback.format_exc())
+
+    threading.Thread(target=worker, daemon=True).start()
 
 
 def _port_open(host: str, port: int) -> bool:
@@ -268,6 +313,7 @@ def main() -> None:
     )
 
     def _on_start() -> None:
+        _check_update_async()
         if not icon_path:
             return
         time.sleep(0.6)
