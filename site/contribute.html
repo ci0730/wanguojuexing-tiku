@@ -118,6 +118,22 @@
     }
     .samples li { margin: 0.25rem 0; }
     .samples em { color: var(--ok); font-style: normal; font-weight: 600; }
+    .contact-label {
+      display: grid;
+      gap: 0.35rem;
+      margin-top: 0.85rem;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+    }
+    .contact-label input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.65rem 0.8rem;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.7);
+      outline: none;
+    }
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -172,13 +188,12 @@
   <div class="wrap">
     <div class="nav">
       <a href="./">← 返回首页</a>
-      <a href="https://github.com/ci0730/wanguojuexing-tiku/issues?q=label%3Acommunity-submission" target="_blank" rel="noopener">查看已提交</a>
     </div>
     <h1>贡献自建题库</h1>
     <p class="lede">
       把你在软件里「导出我的题库」得到的 JSON 提交到这里。
-      <strong>完全免费</strong>，人工审核通过后会进入公共补充库，所有人可通过软件「联网更新」获取。
-      只需自建题；与内置库完全相同的题目会被跳过。
+      <strong>完全免费</strong>，在本页直接提交即可，<strong>不用 GitHub、不用梯子</strong>。
+      人工审核通过后会进入公共补充库，所有人可通过软件「联网更新」获取。
     </p>
 
     <section class="panel">
@@ -195,6 +210,10 @@
         <h3>校验预览</h3>
         <p class="meta-line" id="meta"></p>
         <ul class="samples" id="samples"></ul>
+        <label class="contact-label">
+          联系方式（可选，方便我们回访）
+          <input id="contact" type="text" maxlength="80" placeholder="QQ / 微信 / 邮箱，可留空" />
+        </label>
         <div class="actions">
           <button type="button" id="submitBtn" disabled>提交审核</button>
           <button type="button" class="secondary" id="copyBtn" disabled>仅复制 JSON</button>
@@ -203,8 +222,8 @@
       </div>
 
       <div class="note">
-        提交会打开 GitHub Issue（需登录 GitHub）。页面会把校验后的 JSON 复制到剪贴板，请粘贴到 Issue 的「题库 JSON」栏后提交。
-        审核通过并合并后，「联网更新」即可拉取；不承诺时效，错题/灌水会直接关闭。
+        点「提交审核」后，题库会直接发到维护者邮箱（留在本站完成，无需打开 GitHub）。
+        审核通过并合并后，其他人点软件里的「联网更新」即可拉取。不承诺时效；错题/灌水会被丢弃。
       </div>
     </section>
 
@@ -216,14 +235,15 @@
   <script>
     const MAX_BYTES = 80 * 1024;
     const MAX_QUESTIONS = 300;
-    const ISSUE_URL =
-      "https://github.com/ci0730/wanguojuexing-tiku/issues/new?template=community_bank.yml";
+    // FormSubmit → 维护者邮箱（用户无需 GitHub / 梯子）
+    const SUBMIT_ENDPOINT = "https://formsubmit.co/ajax/17798670730@163.com";
 
     const drop = document.getElementById("drop");
     const fileInput = document.getElementById("file");
     const preview = document.getElementById("preview");
     const meta = document.getElementById("meta");
     const samples = document.getElementById("samples");
+    const contactInput = document.getElementById("contact");
     const submitBtn = document.getElementById("submitBtn");
     const copyBtn = document.getElementById("copyBtn");
     const msg = document.getElementById("msg");
@@ -321,7 +341,7 @@
         preview.classList.add("open");
         submitBtn.disabled = false;
         copyBtn.disabled = false;
-        setMsg("校验通过。点「提交审核」将复制 JSON 并打开 GitHub Issue。", "ok");
+        setMsg("校验通过。点「提交审核」即可在本页完成投稿（无需 GitHub）。", "ok");
       } catch (err) {
         preview.classList.add("open");
         setMsg("校验失败：" + (err.message || String(err)), "err");
@@ -342,7 +362,6 @@
         await navigator.clipboard.writeText(prepared.jsonText);
         return true;
       } catch {
-        // fallback
         const ta = document.createElement("textarea");
         ta.value = prepared.jsonText;
         document.body.appendChild(ta);
@@ -393,16 +412,43 @@
 
     submitBtn.addEventListener("click", async () => {
       if (!prepared) return;
-      const ok = await copyJson();
-      if (!ok) {
-        setMsg("复制失败，请改用「仅复制 JSON」后手动打开 Issue。", "err");
-        return;
+      submitBtn.disabled = true;
+      setMsg("正在提交…", "");
+      try {
+        const contact = (contactInput.value || "").trim() || "未填写";
+        const res = await fetch(SUBMIT_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            _subject: `万国觉醒题库贡献 ${prepared.items.length} 题`,
+            _template: "table",
+            source: "wanguojuexing.cn.mt/contribute",
+            count: String(prepared.items.length),
+            contact,
+            filename: prepared.name || "bank.json",
+            bank_json: prepared.jsonText,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || data.error || `提交失败（${res.status}）`);
+        }
+        setMsg(
+          `已提交 ${prepared.items.length} 题，请等待审核。\n维护者邮箱会收到这份题库；通过后会出现在「联网更新」里。谢谢贡献！`,
+          "ok"
+        );
+      } catch (err) {
+        setMsg(
+          "提交失败：" +
+            (err.message || String(err)) +
+            "\n可点「仅复制 JSON」后发邮件给维护者，或稍后再试。",
+          "err"
+        );
+        submitBtn.disabled = false;
       }
-      setMsg(
-        `已复制 ${prepared.items.length} 题的 JSON。\n请在打开的 GitHub 页面：填写题目数量 = ${prepared.items.length}，把 JSON 粘贴到「题库 JSON」栏后提交。`,
-        "ok"
-      );
-      window.open(ISSUE_URL, "_blank", "noopener,noreferrer");
     });
   </script>
 </body>
