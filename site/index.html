@@ -256,11 +256,11 @@
       </div>
       <p class="lede">本地题库 + 截图识题。粘贴国士无双答题界面，自动 OCR 并匹配正确答案。</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://wwbuq.lanzouu.com/iDyEJ3xuc8da" target="_blank" rel="noopener noreferrer">下载 Windows 版</a>
+        <a class="btn btn-primary" id="download-btn" href="https://gitee.com/jingxuan0717/wanguojuexing-tiku/releases/download/v1.0.2/%E4%B8%87%E5%9B%BD%E8%A7%89%E9%86%92%E9%A2%98%E5%BA%93_%E5%AE%89%E8%A3%85%E5%8C%85_v1.0.2.exe" target="_blank" rel="noopener noreferrer">下载 Windows 版</a>
         <a class="btn btn-ghost" href="#how">查看用法</a>
         <a class="btn btn-ghost" href="./contribute.html">贡献新题</a>
       </div>
-      <p class="meta">安装包 · v1.0.0 · 约 80MB · 提取码 1111 · 双击安装即可用</p>
+      <p class="meta" id="download-meta">安装包 · v1.0.2 · 约 81MB · 双击安装即可用</p>
     </div>
   </header>
 
@@ -296,5 +296,19 @@
   <footer>
     <p>万国觉醒题库 · wanguojuexing.cn.mt · 非官方粉丝工具</p>
   </footer>
+  <script>
+    fetch("./version.json", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.version) return;
+        var btn = document.getElementById("download-btn");
+        var meta = document.getElementById("download-meta");
+        if (btn && data.download_url) btn.href = data.download_url;
+        if (meta) {
+          meta.textContent = "安装包 · v" + String(data.version).replace(/^v/i, "") + " · 约 81MB · 双击安装即可用";
+        }
+      })
+      .catch(function () {});
+  </script>
 </body>
 </html>
