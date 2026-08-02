@@ -282,6 +282,16 @@
       background: #2b211b;
     }
 
+    .bank-actions .file-btn.secondary {
+      background: #2b211b;
+      color: #fff8f0;
+      cursor: pointer;
+    }
+
+    .bank-actions .file-btn.secondary:hover {
+      background: #3d3128;
+    }
+
     .bank-note {
       margin: 0.55rem 0 0;
       font-size: 0.85rem;
@@ -444,9 +454,205 @@
       font-size: 0.8rem;
       color: rgba(28,20,16,0.55);
     }
+
+    .tip-fab {
+      position: fixed;
+      top: 0.85rem;
+      right: 0.85rem;
+      z-index: 40;
+      appearance: none;
+      border: 1px solid rgba(139, 58, 42, 0.35);
+      background: linear-gradient(180deg, #fffaf0, #f0dfc2);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.42rem 0.95rem;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(40, 22, 8, 0.16);
+      transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .tip-fab:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, #fffdf8, #ebcda8);
+    }
+
+    .tip-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(28, 20, 16, 0.42);
+      backdrop-filter: blur(2px);
+    }
+
+    .tip-backdrop.open { display: flex; }
+
+    .tip-modal {
+      width: min(420px, 100%);
+      background: linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(243, 230, 207, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 1.15rem 1.15rem 1rem;
+      animation: tipIn 0.22s ease;
+    }
+
+    @keyframes tipIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .tip-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .tip-head h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      margin: 0 0 0.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    .tip-head p {
+      margin: 0;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: rgba(28, 20, 16, 0.68);
+    }
+
+    .tip-close {
+      appearance: none;
+      border: none;
+      background: rgba(28, 20, 16, 0.06);
+      color: var(--ink);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      font-size: 1.15rem;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .tip-close:hover { background: rgba(139, 58, 42, 0.12); }
+
+    .tip-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      margin-bottom: 0.9rem;
+      padding: 0.28rem;
+      border-radius: 14px;
+      background: rgba(28, 20, 16, 0.05);
+    }
+
+    .tip-tab {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: rgba(28, 20, 16, 0.62);
+      border-radius: 11px;
+      padding: 0.55rem 0.4rem;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .tip-tab[aria-selected="true"] {
+      background: #fffaf0;
+      color: var(--ink);
+      box-shadow: 0 4px 12px rgba(40, 22, 8, 0.1);
+    }
+
+    .tip-tab.alipay[aria-selected="true"] { color: #1677ff; }
+    .tip-tab.wechat[aria-selected="true"] { color: #07c160; }
+
+    .tip-pane { display: none; text-align: center; }
+    .tip-pane.active { display: block; }
+
+    .tip-qr-wrap {
+      display: inline-block;
+      padding: 0.55rem;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid rgba(28, 20, 16, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+
+    .tip-qr-wrap img {
+      display: block;
+      width: min(260px, 72vw);
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .tip-channel-name {
+      margin: 0.75rem 0 0.2rem;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .tip-channel-name.alipay { color: #1677ff; }
+    .tip-channel-name.wechat { color: #07c160; }
+
+    .tip-hint {
+      margin: 0;
+      font-size: 0.84rem;
+      color: rgba(28, 20, 16, 0.58);
+      line-height: 1.45;
+    }
   </style>
 </head>
 <body>
+  <button type="button" class="tip-fab" id="tipFab" aria-haspopup="dialog">赞赏作者</button>
+
+  <div class="tip-backdrop" id="tipBackdrop" role="dialog" aria-modal="true" aria-labelledby="tipTitle" hidden>
+    <div class="tip-modal" role="document">
+      <div class="tip-head">
+        <div>
+          <h2 id="tipTitle">赞赏作者</h2>
+          <p>题库免费维护不易。若帮到你，随喜一杯茶即可。</p>
+        </div>
+        <button type="button" class="tip-close" id="tipClose" aria-label="关闭">×</button>
+      </div>
+
+      <div class="tip-tabs" role="tablist" aria-label="赞赏通道">
+        <button type="button" class="tip-tab alipay" role="tab" id="tipTabAlipay" aria-controls="tipPaneAlipay" aria-selected="true">支付宝</button>
+        <button type="button" class="tip-tab wechat" role="tab" id="tipTabWechat" aria-controls="tipPaneWechat" aria-selected="false">微信支付</button>
+      </div>
+
+      <div class="tip-pane active" id="tipPaneAlipay" role="tabpanel" aria-labelledby="tipTabAlipay">
+        <div class="tip-qr-wrap">
+          <img src="/assets/tip-alipay.png" alt="支付宝收款码" />
+        </div>
+        <p class="tip-channel-name alipay">支付宝扫码</p>
+        <p class="tip-hint">打开支付宝「扫一扫」，对准上方二维码即可</p>
+      </div>
+
+      <div class="tip-pane" id="tipPaneWechat" role="tabpanel" aria-labelledby="tipTabWechat" hidden>
+        <div class="tip-qr-wrap">
+          <img src="/assets/tip-wechat.png" alt="微信收款码" />
+        </div>
+        <p class="tip-channel-name wechat">微信扫码</p>
+        <p class="tip-hint">打开微信「扫一扫」，对准上方二维码即可</p>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <div class="brand-row">
@@ -456,9 +662,10 @@
           <p class="credit">博学智识 · 题库助手</p>
         </div>
       </div>
-      <p class="sub">桌面识题工具 · 粘贴截图即可匹配正确答案</p>
+      <p class="sub">桌面识题工具 · 粘贴截图或开启悬浮框，自动识别框内题目</p>
       <div class="stats" id="stats">正在加载题库…</div>
-      <div style="margin-top:0.7rem">
+      <div style="margin-top:0.7rem; display:flex; gap:0.55rem; flex-wrap:wrap">
+        <button type="button" class="link-btn" id="overlayBtn">开启悬浮识题框</button>
         <button type="button" class="link-btn" id="bankToggle">补题库</button>
       </div>
     </header>
@@ -478,9 +685,17 @@
           <div class="bank-actions">
             <button type="button" id="addBtn">手动添加本题</button>
             <button type="button" class="secondary" id="onlineBtn">联网更新公开题库</button>
+            <button type="button" class="secondary" id="exportUserBtn">导出我的题库</button>
+            <label class="file-btn secondary" id="importUserLabel">
+              上传我的题库
+              <input id="importUserFile" type="file" accept="application/json,.json" hidden />
+            </label>
+            <button type="button" class="secondary" id="contributeBtn">贡献到官网</button>
           </div>
           <p class="bank-note">
-            手动添加会立即生效。联网更新会从公开整理站拉取题库并去重导入（需联网，可能需要几十秒）。
+            手动添加会立即生效。联网更新会从公开整理站与官网社区补充库拉取并去重导入（需联网，可能需要几十秒）。
+            「导出 / 上传我的题库」只处理你自己补充的题目，不会改动内置题库；可把导出的 JSON 分享给好友上传合并。
+            「贡献到官网」免费提交自建题供审核，通过后所有人可通过联网更新获取。
             用户补充保存在本机可写目录，不影响安装文件。
           </p>
           <div class="bank-msg" id="bankMsg"></div>
@@ -548,16 +763,62 @@
     const answerCard = document.getElementById("answerCard");
 
     const bankToggle = document.getElementById("bankToggle");
+    const overlayBtn = document.getElementById("overlayBtn");
+    const tipFab = document.getElementById("tipFab");
+    const tipBackdrop = document.getElementById("tipBackdrop");
+    const tipClose = document.getElementById("tipClose");
+    const tipTabAlipay = document.getElementById("tipTabAlipay");
+    const tipTabWechat = document.getElementById("tipTabWechat");
+    const tipPaneAlipay = document.getElementById("tipPaneAlipay");
+    const tipPaneWechat = document.getElementById("tipPaneWechat");
     const bankWrap = document.getElementById("bankWrap");
     const bankMsg = document.getElementById("bankMsg");
     const addQuestion = document.getElementById("addQuestion");
     const addAnswer = document.getElementById("addAnswer");
     const addBtn = document.getElementById("addBtn");
     const onlineBtn = document.getElementById("onlineBtn");
+    const exportUserBtn = document.getElementById("exportUserBtn");
+    const importUserFile = document.getElementById("importUserFile");
+    const contributeBtn = document.getElementById("contributeBtn");
 
     let currentFile = null;
     let solveToken = 0;
     let solveAbort = null;
+
+    function openTip() {
+      tipBackdrop.hidden = false;
+      tipBackdrop.classList.add("open");
+      tipClose.focus();
+    }
+
+    function closeTip() {
+      tipBackdrop.classList.remove("open");
+      tipBackdrop.hidden = true;
+      tipFab.focus();
+    }
+
+    function showTipChannel(channel) {
+      const isAlipay = channel === "alipay";
+      tipTabAlipay.setAttribute("aria-selected", String(isAlipay));
+      tipTabWechat.setAttribute("aria-selected", String(!isAlipay));
+      tipPaneAlipay.classList.toggle("active", isAlipay);
+      tipPaneWechat.classList.toggle("active", !isAlipay);
+      tipPaneAlipay.hidden = !isAlipay;
+      tipPaneWechat.hidden = isAlipay;
+    }
+
+    tipFab.addEventListener("click", openTip);
+    tipClose.addEventListener("click", closeTip);
+    tipBackdrop.addEventListener("click", (e) => {
+      if (e.target === tipBackdrop) closeTip();
+    });
+    tipTabAlipay.addEventListener("click", () => showTipChannel("alipay"));
+    tipTabWechat.addEventListener("click", () => showTipChannel("wechat"));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && tipBackdrop.classList.contains("open")) {
+        closeTip();
+      }
+    });
 
     async function loadStats() {
       try {
@@ -580,6 +841,23 @@
       if (open) bankWrap.removeAttribute("hidden");
       else bankWrap.setAttribute("hidden", "");
       bankToggle.textContent = open ? "收起补题库" : "补题库";
+    });
+
+    overlayBtn.addEventListener("click", async () => {
+      overlayBtn.disabled = true;
+      statusEl.textContent = "正在启动悬浮识题框…";
+      try {
+        const res = await fetch("/api/overlay/start", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "启动失败");
+        statusEl.textContent = data.already
+          ? "悬浮框已在运行，已切换到前台"
+          : "悬浮框已启动：拖到游戏题目上方，答案显示在框右侧";
+      } catch (err) {
+        statusEl.textContent = "悬浮框启动失败：" + (err.message || String(err));
+      } finally {
+        overlayBtn.disabled = false;
+      }
     });
 
     addBtn.addEventListener("click", async () => {
@@ -635,6 +913,68 @@
       } finally {
         onlineBtn.disabled = false;
       }
+    });
+
+    exportUserBtn.addEventListener("click", async () => {
+      exportUserBtn.disabled = true;
+      bankMsg.textContent = "正在导出自建题库…";
+      try {
+        const res = await fetch("/api/questions/user/export");
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "导出失败");
+        }
+        const blob = await res.blob();
+        const dispo = res.headers.get("Content-Disposition") || "";
+        const m = /filename=\"?([^\";]+)\"?/i.exec(dispo);
+        const name = (m && m[1]) || `rok-user-bank-${new Date().toISOString().slice(0, 10)}.json`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        const text = await blob.text();
+        let count = 0;
+        try { count = JSON.parse(text).count || 0; } catch {}
+        bankMsg.textContent = count
+          ? `已导出 ${count} 道自建题（不含内置题库）`
+          : "自建题库为空，已导出空文件";
+      } catch (err) {
+        bankMsg.textContent = "导出失败：" + (err.message || String(err));
+      } finally {
+        exportUserBtn.disabled = false;
+      }
+    });
+
+    importUserFile.addEventListener("change", async () => {
+      const file = importUserFile.files && importUserFile.files[0];
+      importUserFile.value = "";
+      if (!file) return;
+      bankMsg.textContent = `正在上传 ${file.name}…`;
+      try {
+        const fd = new FormData();
+        fd.append("file", file, file.name);
+        const res = await fetch("/api/questions/user/import", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "上传失败");
+        bankMsg.textContent = [
+          `上传完成：新增 ${data.added}，更新 ${data.updated}，跳过 ${data.skipped}`,
+          `当前题库 ${data.total} 题（自建 ${data.user_added}）`,
+          "仅合并到自建补充，内置题库未改动。",
+        ].join("\n");
+        loadStats();
+      } catch (err) {
+        bankMsg.textContent = "上传失败：" + (err.message || String(err));
+      }
+    });
+
+    contributeBtn.addEventListener("click", () => {
+      window.open("https://wanguojuexing.cn.mt/contribute.html", "_blank", "noopener,noreferrer");
+      bankMsg.textContent =
+        "已打开官网贡献页。请先点「导出我的题库」得到 JSON，再在贡献页上传并提交 GitHub Issue（免费，需审核）。";
     });
 
     function flashDrop() {

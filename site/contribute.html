@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>贡献自建题库 · 万国觉醒题库</title>
+  <meta name="description" content="免费提交你在软件里补充的国士无双题目，审核通过后所有人可通过联网更新获取。" />
+  <link rel="icon" href="assets/app.png" type="image/png" />
+  <style>
+    :root {
+      --ink: #1c1410;
+      --ink-soft: rgba(28, 20, 16, 0.72);
+      --accent: #8b3a2a;
+      --accent-soft: #c45c3e;
+      --ok: #1f6b3a;
+      --line: rgba(28, 20, 16, 0.14);
+      --shadow: 0 22px 60px rgba(40, 22, 8, 0.2);
+      --font-display: "Source Han Serif SC", "Songti SC", "SimSun", "Noto Serif SC", serif;
+      --font-body: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      background:
+        radial-gradient(1100px 560px at 8% -8%, rgba(196, 92, 62, 0.2), transparent 55%),
+        radial-gradient(900px 480px at 100% 0%, rgba(31, 107, 58, 0.12), transparent 48%),
+        linear-gradient(165deg, #f7edd9 0%, #e8d4b4 48%, #d9c39a 100%);
+    }
+    .wrap {
+      width: min(720px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 2.5rem;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.6rem;
+    }
+    .nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .nav a:hover { color: var(--accent-soft); }
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.1rem);
+      letter-spacing: 0.04em;
+      margin: 0 0 0.45rem;
+    }
+    .lede {
+      margin: 0 0 1.4rem;
+      color: var(--ink-soft);
+      line-height: 1.65;
+      max-width: 38rem;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(243, 230, 207, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 1.15rem 1.2rem 1.3rem;
+    }
+    .drop {
+      border: 2px dashed rgba(139, 58, 42, 0.35);
+      border-radius: 14px;
+      padding: 1.4rem 1rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .drop:hover, .drop.drag { border-color: var(--accent); background: rgba(255, 250, 240, 0.7); }
+    .drop strong { display: block; margin-bottom: 0.35rem; }
+    .drop span { color: var(--ink-soft); font-size: 0.92rem; }
+    .file-btn {
+      display: inline-flex;
+      margin-top: 0.85rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff8f0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .file-btn input { display: none; }
+    .preview {
+      margin-top: 1rem;
+      display: none;
+    }
+    .preview.open { display: block; }
+    .preview h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+    .meta-line {
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      margin: 0 0 0.65rem;
+      line-height: 1.5;
+    }
+    .samples {
+      margin: 0;
+      padding: 0.7rem 0.85rem;
+      list-style: none;
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      max-height: 180px;
+      overflow: auto;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+    .samples li { margin: 0.25rem 0; }
+    .samples em { color: var(--ok); font-style: normal; font-weight: 600; }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.75rem 1.25rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(180deg, #d46a4a, var(--accent));
+      color: #fff8f0;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    button.secondary {
+      background: #2b211b;
+    }
+    .msg {
+      margin-top: 0.85rem;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      min-height: 1.4em;
+    }
+    .msg.err { color: var(--accent); }
+    .msg.ok { color: var(--ok); }
+    .note {
+      margin-top: 1.2rem;
+      padding: 0.9rem 1rem;
+      border-left: 3px solid var(--ok);
+      background: rgba(31, 107, 58, 0.08);
+      border-radius: 0 12px 12px 0;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    footer {
+      margin-top: 1.8rem;
+      font-size: 0.85rem;
+      color: rgba(28, 20, 16, 0.55);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <a href="./">← 返回首页</a>
+      <a href="https://github.com/ci0730/wanguojuexing-tiku/issues?q=label%3Acommunity-submission" target="_blank" rel="noopener">查看已提交</a>
+    </div>
+    <h1>贡献自建题库</h1>
+    <p class="lede">
+      把你在软件里「导出我的题库」得到的 JSON 提交到这里。
+      <strong>完全免费</strong>，人工审核通过后会进入公共补充库，所有人可通过软件「联网更新」获取。
+      只需自建题；与内置库完全相同的题目会被跳过。
+    </p>
+
+    <section class="panel">
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="选择或拖入题库 JSON">
+        <strong>拖入或选择题库 JSON</strong>
+        <span>格式需为软件导出的 rok-quiz-user-bank；单次建议 ≤300 题 / 80KB</span>
+        <label class="file-btn">
+          选择文件
+          <input id="file" type="file" accept="application/json,.json" />
+        </label>
+      </div>
+
+      <div class="preview" id="preview">
+        <h3>校验预览</h3>
+        <p class="meta-line" id="meta"></p>
+        <ul class="samples" id="samples"></ul>
+        <div class="actions">
+          <button type="button" id="submitBtn" disabled>提交审核</button>
+          <button type="button" class="secondary" id="copyBtn" disabled>仅复制 JSON</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      </div>
+
+      <div class="note">
+        提交会打开 GitHub Issue（需登录 GitHub）。页面会把校验后的 JSON 复制到剪贴板，请粘贴到 Issue 的「题库 JSON」栏后提交。
+        审核通过并合并后，「联网更新」即可拉取；不承诺时效，错题/灌水会直接关闭。
+      </div>
+    </section>
+
+    <footer>
+      万国觉醒题库 · 非官方粉丝工具 · 贡献免费 · 可自愿打赏支持维护
+    </footer>
+  </div>
+
+  <script>
+    const MAX_BYTES = 80 * 1024;
+    const MAX_QUESTIONS = 300;
+    const ISSUE_URL =
+      "https://github.com/ci0730/wanguojuexing-tiku/issues/new?template=community_bank.yml";
+
+    const drop = document.getElementById("drop");
+    const fileInput = document.getElementById("file");
+    const preview = document.getElementById("preview");
+    const meta = document.getElementById("meta");
+    const samples = document.getElementById("samples");
+    const submitBtn = document.getElementById("submitBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const msg = document.getElementById("msg");
+
+    let prepared = null;
+
+    function setMsg(text, kind) {
+      msg.textContent = text || "";
+      msg.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    function normalizeKey(q) {
+      return String(q || "").replace(/\s+/g, "").replace(/？/g, "?").toLowerCase();
+    }
+
+    function cleanAnswer(a) {
+      return String(a || "").trim().replace(/^["'「『]|["'」』]$/g, "").trim();
+    }
+
+    function parseBank(data) {
+      if (!data || typeof data !== "object") throw new Error("JSON 须为对象或数组");
+      const kind = data.type || "";
+      if (kind && kind !== "rok-quiz-user-bank" && kind !== "user") {
+        throw new Error("不是自建题库文件（type 应为 rok-quiz-user-bank）");
+      }
+      const list = Array.isArray(data) ? data : data.questions;
+      if (!Array.isArray(list)) throw new Error("缺少 questions 数组");
+      const out = [];
+      const seen = new Set();
+      for (const item of list) {
+        if (!item || typeof item !== "object") continue;
+        const question = String(item.question || "").replace(/\s+/g, " ").trim();
+        const answer = cleanAnswer(item.answer);
+        if (question.length < 4 || !answer) continue;
+        const key = normalizeKey(question);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({
+          question,
+          answer,
+          source: String(item.source || "upload"),
+        });
+      }
+      if (!out.length) throw new Error("没有有效题目（需要 question + answer）");
+      if (out.length > MAX_QUESTIONS) {
+        throw new Error(`题目过多（${out.length}），请拆成不超过 ${MAX_QUESTIONS} 题的文件`);
+      }
+      return out;
+    }
+
+    function buildPayload(items) {
+      return {
+        type: "rok-quiz-user-bank",
+        exported_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+        count: items.length,
+        questions: items,
+      };
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+      setMsg("");
+      prepared = null;
+      submitBtn.disabled = true;
+      copyBtn.disabled = true;
+      preview.classList.remove("open");
+
+      if (file.size > MAX_BYTES) {
+        setMsg(`文件过大（${Math.round(file.size / 1024)}KB），上限 ${MAX_BYTES / 1024}KB`, "err");
+        preview.classList.add("open");
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const items = parseBank(data);
+        const payload = buildPayload(items);
+        const jsonText = JSON.stringify(payload, null, 2);
+        if (new Blob([jsonText]).size > MAX_BYTES) {
+          throw new Error("整理后仍超过体积上限，请减少题目后重试");
+        }
+        prepared = { items, payload, jsonText, name: file.name };
+        meta.textContent = `文件 ${file.name} · 有效 ${items.length} 题 · 约 ${Math.round(jsonText.length / 1024)}KB`;
+        samples.innerHTML = items
+          .slice(0, 8)
+          .map(
+            (q) =>
+              `<li>${escapeHtml(q.question.slice(0, 48))}${q.question.length > 48 ? "…" : ""} → <em>${escapeHtml(q.answer)}</em></li>`
+          )
+          .join("");
+        if (items.length > 8) {
+          samples.innerHTML += `<li>…还有 ${items.length - 8} 题</li>`;
+        }
+        preview.classList.add("open");
+        submitBtn.disabled = false;
+        copyBtn.disabled = false;
+        setMsg("校验通过。点「提交审核」将复制 JSON 并打开 GitHub Issue。", "ok");
+      } catch (err) {
+        preview.classList.add("open");
+        setMsg("校验失败：" + (err.message || String(err)), "err");
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function copyJson() {
+      if (!prepared) return false;
+      try {
+        await navigator.clipboard.writeText(prepared.jsonText);
+        return true;
+      } catch {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = prepared.jsonText;
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        return ok;
+      }
+    }
+
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      handleFile(f);
+    });
+
+    drop.addEventListener("click", (e) => {
+      if (e.target.closest("label")) return;
+      fileInput.click();
+    });
+    drop.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+    ["dragenter", "dragover"].forEach((ev) => {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.add("drag");
+      });
+    });
+    ["dragleave", "drop"].forEach((ev) => {
+      drop.addEventListener(ev, (e) => {
+        e.preventDefault();
+        drop.classList.remove("drag");
+      });
+    });
+    drop.addEventListener("drop", (e) => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      handleFile(f);
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const ok = await copyJson();
+      setMsg(ok ? "已复制到剪贴板。" : "复制失败，请手动全选预览内容。", ok ? "ok" : "err");
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      if (!prepared) return;
+      const ok = await copyJson();
+      if (!ok) {
+        setMsg("复制失败，请改用「仅复制 JSON」后手动打开 Issue。", "err");
+        return;
+      }
+      setMsg(
+        `已复制 ${prepared.items.length} 题的 JSON。\n请在打开的 GitHub 页面：填写题目数量 = ${prepared.items.length}，把 JSON 粘贴到「题库 JSON」栏后提交。`,
+        "ok"
+      );
+      window.open(ISSUE_URL, "_blank", "noopener,noreferrer");
+    });
+  </script>
+</body>
+</html>

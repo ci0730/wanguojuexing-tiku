@@ -189,6 +189,12 @@ def _webview2_available() -> bool:
 
 
 def main() -> None:
+    if "--overlay" in sys.argv:
+        from overlay import main as overlay_main
+
+        overlay_main()
+        return
+
     _write_log("start")
 
     if not _acquire_single_instance():

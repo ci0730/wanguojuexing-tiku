@@ -32,6 +32,14 @@ pip install -r requirements.txt
 python desktop.py
 ```
 
+**悬浮识题框**（框内自动 OCR，答案显示在框右侧）：
+
+```bash
+python overlay.py
+```
+
+或在软件主界面点击「开启悬浮识题框」。拖动标题栏对准游戏题目区域即可。
+
 仅调试后端（可选开浏览器）：
 
 ```bash

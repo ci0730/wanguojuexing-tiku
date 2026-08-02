@@ -1,0 +1,32 @@
+name: 贡献自建题库
+description: 提交你在软件里导出的自建题 JSON，审核通过后会进入「联网更新」公共补充库（免费）。
+title: "[社区题库] "
+labels: ["community-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢贡献！请先在官网 [贡献页](https://wanguojuexing.cn.mt/contribute.html) 校验 JSON，再粘贴到下方。
+        只需自建补充题；与内置题库完全相同的题目会被跳过。提交免费，需人工审核后才会公开。
+  - type: input
+    id: count
+    attributes:
+      label: 题目数量
+      description: 本次提交大约多少题？
+      placeholder: "例如 12"
+    validations:
+      required: true
+  - type: textarea
+    id: bank_json
+    attributes:
+      label: 题库 JSON
+      description: 粘贴完整 JSON（含 type: rok-quiz-user-bank 与 questions 数组）。单次建议不超过 300 题 / 80KB。
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: 备注（可选）
+      description: 来源说明、纠错说明等
+      placeholder: 例如：终试新题，已对照游戏核对

@@ -14,6 +14,12 @@ from pathlib import Path
 
 ONLINE_SOURCES = [
     {
+        "id": "community",
+        "name": "官网社区补充题库",
+        "url": "https://cdn.jsdelivr.net/gh/ci0730/wanguojuexing-tiku@master/data/community/approved.json",
+        "kind": "json-list",
+    },
+    {
         "id": "rbtips",
         "name": "rbtips 繁简题库",
         "url": "https://www.rbtips.com/2020/05/lyceum-of-wisdom.html",
@@ -123,16 +129,18 @@ def load_user_questions() -> list[dict]:
 
 
 def merge_questions(*groups: list[dict]) -> list[dict]:
-    seen: set[str] = set()
-    merged: list[dict] = []
+    """Merge question groups. Later groups override earlier ones on the same key."""
+    by_key: dict[str, dict] = {}
+    order: list[str] = []
     for group in groups:
         for item in group:
             key = normalize_key(item["question"])
-            if not key or key in seen:
+            if not key:
                 continue
-            seen.add(key)
-            merged.append(item)
-    return merged
+            if key not in by_key:
+                order.append(key)
+            by_key[key] = item
+    return [by_key[k] for k in order]
 
 
 def save_user_questions(items: list[dict]) -> None:
@@ -143,6 +151,103 @@ def save_user_questions(items: list[dict]) -> None:
         "questions": items,
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def export_user_bank() -> dict:
+    """Serializable payload of user-added questions only (never builtin)."""
+    items = load_user_questions()
+    return {
+        "type": "rok-quiz-user-bank",
+        "exported_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "count": len(items),
+        "questions": [
+            {
+                "question": str(item.get("question", "")).strip(),
+                "answer": clean_answer(str(item.get("answer", ""))),
+                "source": str(item.get("source", "user")),
+            }
+            for item in items
+            if str(item.get("question", "")).strip() and clean_answer(str(item.get("answer", "")))
+        ],
+    }
+
+
+def parse_user_bank_payload(data) -> list[dict]:
+    """Accept export JSON, ``{questions:[…]}``, or a bare list of Q/A dicts."""
+    if isinstance(data, dict):
+        kind = str(data.get("type") or "")
+        if kind and kind not in {"rok-quiz-user-bank", "user"}:
+            raise ValueError("不是自建题库文件（type 须为 rok-quiz-user-bank）")
+        items = data.get("questions", [])
+    elif isinstance(data, list):
+        items = data
+    else:
+        raise ValueError("题库格式无效：需要 JSON 对象或数组")
+    if not isinstance(items, list):
+        raise ValueError("questions 字段必须是数组")
+
+    out: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        q = re.sub(r"\s+", " ", str(item.get("question", "")).strip())
+        a = clean_answer(str(item.get("answer", "")))
+        if len(q) < 4 or not a:
+            continue
+        out.append(
+            {
+                "question": q,
+                "answer": a,
+                "source": str(item.get("source") or "upload"),
+            }
+        )
+    return out
+
+
+def import_user_bank(items: list[dict], source: str = "upload") -> dict:
+    """Merge into the user store only. Builtin ``questions.json`` is never modified."""
+    users = load_user_questions()
+    by_key = {normalize_key(item["question"]): i for i, item in enumerate(users)}
+    builtin_same = {
+        normalize_key(q["question"]): clean_answer(q["answer"])
+        for q in load_builtin_questions()
+    }
+    added = 0
+    updated = 0
+    skipped = 0
+    for item in items:
+        q = re.sub(r"\s+", " ", str(item.get("question", "")).strip())
+        a = clean_answer(str(item.get("answer", "")))
+        key = normalize_key(q)
+        if len(q) < 4 or not a or not key:
+            skipped += 1
+            continue
+        # Identical to builtin — skip so uploads can't dump the whole public bank
+        # into the user file. Differing answers still allowed as local corrections.
+        if key in builtin_same and builtin_same[key] == a:
+            skipped += 1
+            continue
+        src = str(item.get("source") or source)
+        if key in by_key:
+            idx = by_key[key]
+            if users[idx]["answer"] == a:
+                skipped += 1
+                continue
+            users[idx]["answer"] = a
+            users[idx]["source"] = src
+            updated += 1
+        else:
+            users.append({"question": q, "answer": a, "source": src})
+            by_key[key] = len(users) - 1
+            added += 1
+    if added or updated:
+        save_user_questions(users)
+    return {
+        "added": added,
+        "updated": updated,
+        "skipped": skipped,
+        "user_total": len(users),
+    }
 
 
 def add_user_question(question: str, answer: str, source: str = "manual") -> dict:
@@ -271,8 +376,16 @@ def parse_html_table(text: str) -> list[dict]:
 
 def parse_json_list(text: str) -> list[dict]:
     data = json.loads(text)
+    # Accept software export / community pack ({type, questions:[…]}) or bare list
     if isinstance(data, dict):
-        data = data.get("questions", data.get("data", []))
+        kind = str(data.get("type") or "")
+        if kind and kind not in {"rok-quiz-user-bank", "user"}:
+            # Unknown typed payload — still try questions[] if present
+            pass
+        try:
+            return parse_user_bank_payload(data)
+        except ValueError:
+            data = data.get("questions", data.get("data", []))
     rows = []
     if not isinstance(data, list):
         return rows
