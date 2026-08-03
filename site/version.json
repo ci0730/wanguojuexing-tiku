@@ -1,6 +1,7 @@
 {
   "version": "1.0.3",
-  "download_url": "https://gitee.com/jingxuan0717/wanguojuexing-tiku/releases/download/v1.0.3/万国觉醒题库_安装包_v1.0.3.zip",
-  "notes": "修复部分电脑打开白屏：界面加载失败时自动用浏览器打开本地服务。请下载 ZIP，解压后安装。若 Edge 提示不安全：保留 → 显示更多 → 仍然保留。",
+  "download_url": "https://gitee.com/jingxuan0717/wanguojuexing-tiku/releases/download/v1.0.3/%E4%B8%87%E5%9B%BD%E8%A7%89%E9%86%92%E9%A2%98%E5%BA%93_%E5%AE%89%E8%A3%85%E5%8C%85_v1.0.3.zip",
+  "page_url": "https://gitee.com/jingxuan0717/wanguojuexing-tiku/releases/tag/v1.0.3",
+  "notes": "修复部分电脑打开白屏：界面加载失败时自动用浏览器打开本地服务。请下载 ZIP，解压后安装。国内直连 Gitee，无需翻墙。若 Edge 提示不安全：保留 → 显示更多 → 仍然保留。",
   "force": false
 }
