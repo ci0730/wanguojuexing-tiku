@@ -1,6 +1,6 @@
 {
   "version": "1.0.2",
-  "download_url": "https://github.com/ci0730/wanguojuexing-tiku/releases/download/v1.0.2/RoKQuizBank_Setup_v1.0.2.exe",
-  "notes": "安装包发布与一键更新；修复题库贡献与版本检测。国内若 GitHub 下载较慢，可多试几次或换网络。",
+  "download_url": "https://gitee.com/jingxuan0717/wanguojuexing-tiku/releases/download/v1.0.2/万国觉醒题库_安装包_v1.0.2.exe",
+  "notes": "安装包发布与一键更新；修复题库贡献与版本检测。国内直连 Gitee 下载。",
   "force": false
 }
